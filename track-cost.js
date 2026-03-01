@@ -147,10 +147,10 @@ if (require.main === module) {
     }
 
     const title = args[titleIndex + 1];
-    const body = bodyIndex !== -1 ? args[bodyIndex + 1] : '';
-    const priority = priorityIndex !== -1 ? `priority:${args[priorityIndex + 1]}` : 'priority:medium';
+    const body = bodyIndex !== -1 ? args[bodyIndex + 1] : null;
+    const labels = priorityIndex !== -1 ? [`priority:${args[priorityIndex + 1]}`] : [];
 
-    createIssue(title, body, [priority])
+    createIssue(title, body, labels)
       .then(issue => {
         console.log(`✅ Issue created: #${issue.number} - ${issue.title}`);
         console.log(`   URL: ${issue.html_url}`);
@@ -227,126 +227,58 @@ if (require.main === module) {
   }
 }
 
-// Create a GitHub issue
+// Create a GitHub issue using gh CLI
 async function createIssue(title, body, labels = []) {
-  if (!GITHUB_TOKEN) {
-    console.log('⚠️  GITHUB_TOKEN not set. Cannot create issue.');
-    return null;
+  try {
+    const labelArgs = labels.map(l => `--label "${l}"`).join(' ');
+    const bodyArg = body ? `--body "${body}"` : '--body ""';
+    const cmd = `gh issue create --title "${title}" ${bodyArg} ${labelArgs}`;
+    
+    const result = execSync(cmd, {
+      cwd: __dirname,
+      encoding: 'utf8'
+    });
+    
+    // Extract issue number from URL
+    const match = result.match(/issues\/(\d+)/);
+    const number = match ? match[1] : null;
+    
+    return { number, html_url: result.trim() };
+  } catch (e) {
+    throw new Error(`Failed to create issue: ${e.message}`);
   }
-
-  const data = JSON.stringify({ title, body, labels });
-  
-  const options = {
-    hostname: 'api.github.com',
-    path: `/repos/${REPO}/issues`,
-    method: 'POST',
-    headers: {
-      'Accept': 'application/vnd.github+json',
-      'Authorization': `Bearer ${GITHUB_TOKEN}`,
-      'Content-Type': 'application/json',
-      'Content-Length': data.length,
-      'User-Agent': 'Herold-Cost-Tracker'
-    }
-  };
-
-  return new Promise((resolve, reject) => {
-    const req = https.request(options, (res) => {
-      let responseData = '';
-      res.on('data', (chunk) => responseData += chunk);
-      res.on('end', () => {
-        try {
-          const parsed = JSON.parse(responseData);
-          if (res.statusCode >= 200 && res.statusCode < 300) {
-            resolve(parsed);
-          } else {
-            reject(new Error(`GitHub API error: ${parsed.message}`));
-          }
-        } catch (e) {
-          reject(e);
-        }
-      });
-    });
-
-    req.on('error', reject);
-    req.write(data);
-    req.end();
-  });
 }
 
-// Update issue labels (to move between columns)
+// Update issue labels (to move between columns) using gh CLI
 async function updateIssueLabels(issueNumber, labels) {
-  if (!GITHUB_TOKEN) return null;
-
-  const data = JSON.stringify({ labels });
-  
-  const options = {
-    hostname: 'api.github.com',
-    path: `/repos/${REPO}/issues/${issueNumber}`,
-    method: 'PATCH',
-    headers: {
-      'Accept': 'application/vnd.github+json',
-      'Authorization': `Bearer ${GITHUB_TOKEN}`,
-      'Content-Type': 'application/json',
-      'Content-Length': data.length,
-      'User-Agent': 'Herold-Cost-Tracker'
-    }
-  };
-
-  return new Promise((resolve, reject) => {
-    const req = https.request(options, (res) => {
-      let responseData = '';
-      res.on('data', (chunk) => responseData += chunk);
-      res.on('end', () => {
-        try {
-          resolve(JSON.parse(responseData));
-        } catch (e) {
-          reject(e);
-        }
-      });
+  try {
+    // gh doesn't have a direct label edit command, so we use API via gh
+    const labelArgs = labels.map(l => `"${l}"`).join(' ');
+    const cmd = `gh api repos/${REPO}/issues/${issueNumber} -X PATCH -f labels=${labelArgs}`;
+    
+    execSync(cmd, {
+      cwd: __dirname,
+      encoding: 'utf8'
     });
-
-    req.on('error', reject);
-    req.write(data);
-    req.end();
-  });
+    
+    return { number: issueNumber };
+  } catch (e) {
+    throw new Error(`Failed to update issue: ${e.message}`);
+  }
 }
 
-// Close an issue
+// Close an issue using gh CLI
 async function closeIssue(issueNumber) {
-  if (!GITHUB_TOKEN) return null;
-
-  const data = JSON.stringify({ state: 'closed' });
-  
-  const options = {
-    hostname: 'api.github.com',
-    path: `/repos/${REPO}/issues/${issueNumber}`,
-    method: 'PATCH',
-    headers: {
-      'Accept': 'application/vnd.github+json',
-      'Authorization': `Bearer ${GITHUB_TOKEN}`,
-      'Content-Type': 'application/json',
-      'Content-Length': data.length,
-      'User-Agent': 'Herold-Cost-Tracker'
-    }
-  };
-
-  return new Promise((resolve, reject) => {
-    const req = https.request(options, (res) => {
-      let responseData = '';
-      res.on('data', (chunk) => responseData += chunk);
-      res.on('end', () => {
-        try {
-          resolve(JSON.parse(responseData));
-        } catch (e) {
-          reject(e);
-        }
-      });
+  try {
+    execSync(`gh issue close ${issueNumber}`, {
+      cwd: __dirname,
+      encoding: 'utf8'
     });
-
-    req.on('error', reject);
-    req.write(data);
-    req.end();
-  });
+    
+    return { number: issueNumber };
+  } catch (e) {
+    throw new Error(`Failed to close issue: ${e.message}`);
+  }
 }
 
 module.exports = { trackTask, estimateCost, loadMetrics, createIssue, updateIssueLabels, closeIssue };

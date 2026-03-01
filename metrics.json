@@ -1,18 +1,18 @@
 {
-  "totalCost": 0.035,
-  "totalCalls": 7,
-  "tasksCompleted": 7,
+  "totalCost": 0.04,
+  "totalCalls": 8,
+  "tasksCompleted": 8,
   "costChange": 0,
-  "callsChange": 7,
-  "tasksChange": 7,
+  "callsChange": 8,
+  "tasksChange": 8,
   "models": [
     {
       "name": "moonshot/kimi-k2.5",
-      "cost": 0.035,
-      "calls": 7
+      "cost": 0.04,
+      "calls": 8
     }
   ],
-  "lastUpdated": "2026-03-01T17:43:19.704Z",
+  "lastUpdated": "2026-03-01T19:36:39.670Z",
   "dailyLog": [
     {
       "date": "2026-03-01T17:01:25.081Z",
@@ -53,6 +53,12 @@
     {
       "date": "2026-03-01T17:43:19.704Z",
       "task": "Updated scraper to remove webhook dependency",
+      "cost": 0.005,
+      "model": "moonshot/kimi-k2.5"
+    },
+    {
+      "date": "2026-03-01T19:36:39.668Z",
+      "task": "Fixed Trønder-Avisa geo-blocking issue - now skipped with notice",
       "cost": 0.005,
       "model": "moonshot/kimi-k2.5"
     }

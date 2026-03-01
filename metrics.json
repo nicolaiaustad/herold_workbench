@@ -1,18 +1,18 @@
 {
-  "totalCost": 0.02,
-  "totalCalls": 4,
-  "tasksCompleted": 4,
+  "totalCost": 0.025,
+  "totalCalls": 5,
+  "tasksCompleted": 5,
   "costChange": 0,
-  "callsChange": 4,
-  "tasksChange": 4,
+  "callsChange": 5,
+  "tasksChange": 5,
   "models": [
     {
       "name": "moonshot/kimi-k2.5",
-      "cost": 0.02,
-      "calls": 4
+      "cost": 0.025,
+      "calls": 5
     }
   ],
-  "lastUpdated": "2026-03-01T17:20:52.936Z",
+  "lastUpdated": "2026-03-01T17:28:44.249Z",
   "dailyLog": [
     {
       "date": "2026-03-01T17:01:25.081Z",
@@ -35,6 +35,12 @@
     {
       "date": "2026-03-01T17:20:52.935Z",
       "task": "Created dummy task via GitHub API",
+      "cost": 0.005,
+      "model": "moonshot/kimi-k2.5"
+    },
+    {
+      "date": "2026-03-01T17:28:44.249Z",
+      "task": "Fixed dashboard to use cached issues.json instead of direct GitHub API",
       "cost": 0.005,
       "model": "moonshot/kimi-k2.5"
     }

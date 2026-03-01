@@ -1,0 +1,23 @@
+📰 News Scan - 01.03.2025
+Found 3 leads:
+
+1. 🔒 *Adresseavisen* (Trøndelag)
+   Kommunen sliter med tungvint papirbasert rapportering
+   https://www.adresseavisen.no/.../artikkel...
+   Keywords: rapporteringskrav, papirbasert, tungvint
+   👤 Lars Hansen, Anne Pedersen
+
+2. *Trønder-Avisa* (Trøndelag)
+   Bedrift digitaliserer manuelle prosesser etter flaskehalser
+   https://www.tronderavisa.no/.../artikkel...
+   Keywords: manuell, prosess, digitalisering, flaskehals
+   👤 Erik Solberg
+
+3. 🔒 *Sunnmørsposten* (Møre og Romsdal)
+   Byråkrati bremser effektivisering i offentlig sektor
+   https://www.smp.no/.../artikkel...
+   Keywords: byråkrati, effektivisering, tungrodd
+
+---
+⚠️ 3 articles flagged with paywall (need login credentials)
+ℹ️ This is a DEMO report - actual scraping requires fixing network access to Norwegian RSS feeds

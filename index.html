@@ -459,50 +459,20 @@
     </div>
 
     <script>
-        const REPO = 'nicolaiaustad/herold_workbench';
-        const ISSUES_URL = `https://api.github.com/repos/${REPO}/issues?state=all`;
         let tasks = [];
         let draggedTask = null;
 
         async function loadTasks() {
             try {
-                const response = await fetch(ISSUES_URL);
+                const response = await fetch('issues.json?t=' + Date.now());
                 if (!response.ok) throw new Error('Failed to load issues');
-                const issues = await response.json();
-                tasks = issues.map(issue => parseIssue(issue));
+                const data = await response.json();
+                tasks = data.tasks || [];
                 renderTasks();
             } catch (err) {
                 console.error('Error loading issues:', err);
-                document.querySelector('.board').innerHTML = '<p style="color:#ef4444;text-align:center;">Failed to load issues from GitHub.</p>';
+                document.querySelector('.board').innerHTML = '<p style="color:#ef4444;text-align:center;">Failed to load issues. Please try again later.</p>';
             }
-        }
-
-        function parseIssue(issue) {
-            const labels = issue.labels.map(l => l.name.toLowerCase());
-            
-            // Determine priority from labels
-            let priority = 'medium';
-            if (labels.includes('priority:high') || labels.includes('high')) priority = 'high';
-            if (labels.includes('priority:low') || labels.includes('low')) priority = 'low';
-            
-            // Determine status from labels or issue state
-            let status = 'todo';
-            if (issue.state === 'closed') {
-                status = 'done';
-            } else if (labels.includes('status:inprogress') || labels.includes('inprogress')) {
-                status = 'inprogress';
-            } else if (labels.includes('status:review') || labels.includes('review')) {
-                status = 'review';
-            }
-            
-            return {
-                id: issue.number.toString(),
-                title: issue.title,
-                description: issue.body || '',
-                priority,
-                status,
-                url: issue.html_url
-            };
         }
 
         function renderTasks() {

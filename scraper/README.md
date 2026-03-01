@@ -10,20 +10,20 @@ chmod +x setup-cron.sh
 ./setup-cron.sh
 ```
 
-## Environment Variables
+## How It Works
 
-```bash
-export SLACK_WEBHOOK_URL="https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
-```
-
-Add to `~/.bashrc` or `~/.profile` to persist.
+1. **Daily at 10 AM**: Scraper runs and checks newspapers
+2. **Findings saved**: Results stored in `findings_YYYYMMDD.json` and `report_YYYYMMDD.txt`
+3. **Herold sends report**: I read the report and send it directly to you on Slack
 
 ## Manual Run
 
 ```bash
 cd /data/.openclaw/workspace/herold_workbench/scraper
-python3 news_scraper.py
+./venv/bin/python3 news_scraper.py
 ```
+
+After running, I'll see the report and can send it to you immediately.
 
 ## Sources Monitored
 

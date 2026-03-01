@@ -16,8 +16,8 @@ from urllib.parse import urljoin, quote
 from bs4 import BeautifulSoup
 import feedparser
 
-# Slack webhook (set via env var)
-SLACK_WEBHOOK = os.environ.get('SLACK_WEBHOOK_URL')
+# Slack notification via OpenClaw message tool
+# Findings are saved to JSON for manual review and sending
 
 # Keywords to search for (Norwegian)
 KEYWORDS = [
@@ -298,39 +298,58 @@ class NewsScraper:
         
         return {"blocks": blocks}
     
-    async def send_to_slack(self):
-        """Send findings to Slack"""
-        if not SLACK_WEBHOOK:
-            print("No SLACK_WEBHOOK_URL set, skipping Slack notification")
-            return
+    def format_text_report(self):
+        """Format findings as text for Slack"""
+        if not self.findings:
+            return None
         
-        message = self.format_slack_message()
-        if not message:
-            print("No findings to report")
-            return
+        sorted_findings = sorted(self.findings, key=lambda x: x['score'], reverse=True)
         
-        try:
-            async with self.session.post(
-                SLACK_WEBHOOK,
-                json=message,
-                headers={'Content-Type': 'application/json'}
-            ) as resp:
-                if resp.status == 200:
-                    print(f"✅ Sent {len(self.findings)} findings to Slack")
-                else:
-                    print(f"❌ Failed to send to Slack: {resp.status}")
-        except Exception as e:
-            print(f"❌ Error sending to Slack: {e}")
+        lines = [
+            f"📰 Daily News Scan - {datetime.now().strftime('%d.%m.%Y')}",
+            f"Found {len(sorted_findings)} potential leads from Central Norway newspapers",
+            ""
+        ]
+        
+        for i, finding in enumerate(sorted_findings[:5], 1):
+            paywall_icon = "🔒 " if finding['paywall'] else ""
+            lines.append(f"{i}. {paywall_icon}*{finding['source']}* ({finding['region']})")
+            lines.append(f"   <{finding['url']}|{finding['title']}>")
+            lines.append(f"   Keywords: {', '.join(finding['keywords'][:3])}")
+            
+            if finding['names']:
+                lines.append(f"   👤 {', '.join(finding['names'])}")
+            if finding['emails']:
+                lines.append(f"   📧 {', '.join(finding['emails'][:2])}")
+            if finding['phones']:
+                lines.append(f"   📞 {', '.join(finding['phones'][:1])}")
+            
+            lines.append("")
+        
+        return "\n".join(lines)
     
     async def save_findings(self):
-        """Save findings to JSON file"""
-        filename = f"/data/.openclaw/workspace/herold_workbench/scraper/findings_{datetime.now().strftime('%Y%m%d')}.json"
-        with open(filename, 'w', encoding='utf-8') as f:
+        """Save findings to JSON and text report"""
+        date_str = datetime.now().strftime('%Y%m%d')
+        
+        # Save JSON
+        json_file = f"/data/.openclaw/workspace/herold_workbench/scraper/findings_{date_str}.json"
+        with open(json_file, 'w', encoding='utf-8') as f:
             json.dump({
                 'date': datetime.now().isoformat(),
                 'findings': self.findings
             }, f, ensure_ascii=False, indent=2)
-        print(f"💾 Saved findings to {filename}")
+        print(f"💾 Saved findings to {json_file}")
+        
+        # Save text report for Slack
+        report = self.format_text_report()
+        if report:
+            report_file = f"/data/.openclaw/workspace/herold_workbench/scraper/report_{date_str}.txt"
+            with open(report_file, 'w', encoding='utf-8') as f:
+                f.write(report)
+            print(f"💾 Saved report to {report_file}")
+            return report_file
+        return None
 
 
 async def main():
@@ -338,8 +357,11 @@ async def main():
     
     async with NewsScraper() as scraper:
         await scraper.scrape_all()
-        await scraper.save_findings()
-        await scraper.send_to_slack()
+        report_file = await scraper.save_findings()
+        
+        if report_file:
+            print(f"\n📋 Report ready at: {report_file}")
+            print("   Herold will read and send this via Slack")
     
     print(f"✅ Completed at {datetime.now()}")
 

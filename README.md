@@ -39,7 +39,20 @@ The dashboard displays agent performance metrics below the kanban board:
 - **Avg Cost/Task** - Efficiency metric
 - **Cost by Model** - Breakdown by LLM provider
 
-Metrics are loaded from `metrics.json` in the repo. Update this file to reflect current spending.
+### How Cost Tracking Works
+
+Herold automatically tracks costs using `track-cost.js`. After completing work, the agent runs:
+
+```bash
+node track-cost.js --task "Description of work done" --model "moonshot/kimi-k2.5"
+```
+
+This updates `metrics.json` with estimated costs based on token usage:
+- **moonshot/kimi-k2.5**: ~$0.005 per task
+- **openai/gpt-4o**: ~$0.02 per task
+- **openai/gpt-4o-mini**: ~$0.0005 per task
+
+The script auto-commits changes to GitHub, so metrics appear on the dashboard within minutes.
 
 ## GitHub Pages
 

@@ -9,6 +9,7 @@ A kanban dashboard powered by GitHub Issues for tracking Herold's tasks.
 - **Priority labels**: `priority:high`, `priority:medium`, `priority:low`
 - **Status labels**: `status:inprogress`, `status:review`
 - **Auto-refresh** - Updates every 60 seconds
+- **API Cost Metrics** - Track agent performance and spending
 
 ## How to Use
 
@@ -27,6 +28,18 @@ Add labels:
 - `priority:high` (red)
 - `priority:medium` (yellow) - default
 - `priority:low` (green)
+
+## API Cost Metrics
+
+The dashboard displays agent performance metrics below the kanban board:
+
+- **Total API Cost** - Accumulated spending
+- **API Calls** - Total number of API requests
+- **Tasks Completed** - Number of closed issues
+- **Avg Cost/Task** - Efficiency metric
+- **Cost by Model** - Breakdown by LLM provider
+
+Metrics are loaded from `metrics.json` in the repo. Update this file to reflect current spending.
 
 ## GitHub Pages
 

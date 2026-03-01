@@ -1,0 +1,26 @@
+{
+  "totalCost": 12.45,
+  "totalCalls": 2847,
+  "tasksCompleted": 23,
+  "costChange": -15,
+  "callsChange": 23,
+  "tasksChange": 45,
+  "models": [
+    {
+      "name": "moonshot/kimi-k2.5",
+      "cost": 8.32,
+      "calls": 1245
+    },
+    {
+      "name": "openai/gpt-4o",
+      "cost": 3.45,
+      "calls": 892
+    },
+    {
+      "name": "openai/gpt-4o-mini",
+      "cost": 0.68,
+      "calls": 710
+    }
+  ],
+  "lastUpdated": "2026-03-01T17:00:00Z"
+}

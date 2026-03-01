@@ -257,6 +257,101 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        .metrics {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid #2a2a4a;
+        }
+
+        .metrics h2 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .metric-card {
+            background: #1a1a2e;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 3px solid #6366f1;
+        }
+
+        .metric-card.cost { border-left-color: #10b981; }
+        .metric-card.calls { border-left-color: #3b82f6; }
+        .metric-card.tasks { border-left-color: #f59e0b; }
+        .metric-card.avg { border-left-color: #8b5cf6; }
+
+        .metric-value {
+            font-size: 28px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 5px;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-change {
+            font-size: 11px;
+            margin-top: 8px;
+        }
+
+        .metric-change.positive { color: #10b981; }
+        .metric-change.negative { color: #ef4444; }
+
+        .model-breakdown {
+            margin-top: 20px;
+            background: #1a1a2e;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .model-breakdown h3 {
+            font-size: 14px;
+            margin-bottom: 15px;
+            color: #94a3b8;
+        }
+
+        .model-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #252542;
+        }
+
+        .model-row:last-child {
+            border-bottom: none;
+        }
+
+        .model-name {
+            font-size: 13px;
+            color: #e0e0e0;
+        }
+
+        .model-cost {
+            font-size: 13px;
+            color: #6366f1;
+            font-family: monospace;
+        }
+
+        .last-updated {
+            text-align: right;
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 15px;
+        }
     </style>
 </head>
 <body>
@@ -297,6 +392,44 @@
             </div>
             <div class="tasks" ondrop="drop(event, 'done')" ondragover="allowDrop(event)"></div>
         </div>
+    </div>
+
+    <div class="metrics">
+        <h2>📊 Agent Performance</h2>
+        <div class="metrics-grid">
+            <div class="metric-card cost">
+                <div class="metric-value" id="totalCost">$0.00</div>
+                <div class="metric-label">Total API Cost</div>
+                <div class="metric-change positive" id="costChange">-</div>
+            </div>
+            <div class="metric-card calls">
+                <div class="metric-value" id="totalCalls">0</div>
+                <div class="metric-label">API Calls</div>
+                <div class="metric-change" id="callsChange">-</div>
+            </div>
+            <div class="metric-card tasks">
+                <div class="metric-value" id="tasksCompleted">0</div>
+                <div class="metric-label">Tasks Completed</div>
+                <div class="metric-change positive" id="tasksChange">-</div>
+            </div>
+            <div class="metric-card avg">
+                <div class="metric-value" id="avgCost">$0.00</div>
+                <div class="metric-label">Avg Cost/Task</div>
+                <div class="metric-change" id="avgChange">-</div>
+            </div>
+        </div>
+
+        <div class="model-breakdown">
+            <h3>Cost by Model</h3>
+            <div id="modelBreakdown">
+                <div class="model-row">
+                    <span class="model-name">Loading...</span>
+                    <span class="model-cost">-</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="last-updated" id="lastUpdated">Last updated: Never</div>
     </div>
 
     <div class="modal" id="taskModal">
@@ -444,6 +577,79 @@
         loadTasks();
         // Refresh every 60 seconds
         setInterval(loadTasks, 60000);
+
+        // Load metrics
+        async function loadMetrics() {
+            try {
+                const response = await fetch('metrics.json?t=' + Date.now());
+                if (!response.ok) throw new Error('Failed to load metrics');
+                const data = await response.json();
+                renderMetrics(data);
+            } catch (err) {
+                console.error('Error loading metrics:', err);
+                // Show placeholder data
+                renderMetrics({
+                    totalCost: 0,
+                    totalCalls: 0,
+                    tasksCompleted: 0,
+                    costChange: 0,
+                    callsChange: 0,
+                    tasksChange: 0,
+                    models: [],
+                    lastUpdated: new Date().toISOString()
+                });
+            }
+        }
+
+        function renderMetrics(data) {
+            document.getElementById('totalCost').textContent = '$' + data.totalCost.toFixed(2);
+            document.getElementById('totalCalls').textContent = data.totalCalls.toLocaleString();
+            document.getElementById('tasksCompleted').textContent = data.tasksCompleted;
+            
+            const avgCost = data.tasksCompleted > 0 ? data.totalCost / data.tasksCompleted : 0;
+            document.getElementById('avgCost').textContent = '$' + avgCost.toFixed(3);
+
+            // Update change indicators
+            updateChange('costChange', data.costChange);
+            updateChange('callsChange', data.callsChange);
+            updateChange('tasksChange', data.tasksChange);
+
+            // Model breakdown
+            const breakdownEl = document.getElementById('modelBreakdown');
+            if (data.models && data.models.length > 0) {
+                breakdownEl.innerHTML = data.models.map(m => `
+                    <div class="model-row">
+                        <span class="model-name">${escapeHtml(m.name)}</span>
+                        <span class="model-cost">$${m.cost.toFixed(4)}</span>
+                    </div>
+                `).join('');
+            } else {
+                breakdownEl.innerHTML = `
+                    <div class="model-row">
+                        <span class="model-name" style="color:#64748b;font-style:italic;">No data yet. Metrics will appear here once updated.</span>
+                    </div>
+                `;
+            }
+
+            document.getElementById('lastUpdated').textContent = 'Last updated: ' + new Date(data.lastUpdated).toLocaleString();
+        }
+
+        function updateChange(id, value) {
+            const el = document.getElementById(id);
+            if (value > 0) {
+                el.textContent = '+' + value + '% vs last week';
+                el.className = 'metric-change negative';
+            } else if (value < 0) {
+                el.textContent = value + '% vs last week';
+                el.className = 'metric-change positive';
+            } else {
+                el.textContent = 'No change';
+                el.className = 'metric-change';
+            }
+        }
+
+        loadMetrics();
+        setInterval(loadMetrics, 300000); // Refresh every 5 minutes
     </script>
 </body>
 </html>

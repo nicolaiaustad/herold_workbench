@@ -1,0 +1,42 @@
+{
+  "tasks": [
+    {
+      "id": "4",
+      "title": "📋 Test API-created task",
+      "description": "This task was created via the API using track-cost.js",
+      "priority": "low",
+      "status": "todo",
+      "createdAt": "2026-03-01T17:23:46Z",
+      "updatedAt": "2026-03-01T17:23:46Z"
+    },
+    {
+      "id": "3",
+      "title": "📋 Test API-created task",
+      "description": "This task was created via the gh CLI",
+      "priority": "low",
+      "status": "todo",
+      "createdAt": "2026-03-01T17:23:02Z",
+      "updatedAt": "2026-03-01T17:23:02Z"
+    },
+    {
+      "id": "2",
+      "title": "🧪 Dummy Task - Test Kanban Board",
+      "description": "This is a test task to demonstrate the kanban board functionality.\n\n**Description:**\n- Testing the GitHub Issues integration\n- Verifying task appears in \"To Do\" column\n- Checking auto-refresh works\n\n**Acceptance Criteria:**\n- [ ] Task appears on dashboard\n- [ ] Can drag between columns\n- [ ] Metrics update correctly\n\n**Priority:** Low",
+      "priority": "low",
+      "status": "todo",
+      "createdAt": "2026-03-01T17:20:48Z",
+      "updatedAt": "2026-03-01T17:20:48Z"
+    },
+    {
+      "id": "1",
+      "title": "Test that this issue appear",
+      "description": "Just a test. Remove the issue when you have picked it up\n",
+      "priority": "medium",
+      "status": "todo",
+      "createdAt": "2026-03-01T16:49:52Z",
+      "updatedAt": "2026-03-01T16:49:52Z"
+    }
+  ],
+  "lastUpdated": "2026-03-01T17:27:51.911Z",
+  "totalCount": 4
+}

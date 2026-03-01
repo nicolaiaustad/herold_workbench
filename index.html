@@ -326,8 +326,21 @@
     </div>
 
     <script>
-        let tasks = JSON.parse(localStorage.getItem('kanban_tasks')) || [];
+        const TASKS_URL = 'tasks.json';
+        let tasks = [];
         let draggedTask = null;
+
+        async function loadTasks() {
+            try {
+                const response = await fetch(TASKS_URL + '?t=' + Date.now());
+                if (!response.ok) throw new Error('Failed to load');
+                tasks = await response.json();
+                renderTasks();
+            } catch (err) {
+                console.error('Error loading tasks:', err);
+                document.querySelector('.board').innerHTML = '<p style="color:#ef4444;text-align:center;">Failed to load tasks. Check tasks.json exists.</p>';
+            }
+        }
 
         function renderTasks() {
             document.querySelectorAll('.tasks').forEach(col => col.innerHTML = '');
@@ -345,7 +358,6 @@
                     <p>${escapeHtml(task.description)}</p>
                     <div class="task-meta">
                         <span class="priority priority-${task.priority}">${task.priority}</span>
-                        <button class="delete-btn" onclick="deleteTask('${task.id}')">×</button>
                     </div>
                 `;
                 taskEl.addEventListener('dragstart', drag);
@@ -363,46 +375,8 @@
             return div.innerHTML;
         }
 
-        function openModal() {
-            document.getElementById('taskModal').classList.add('active');
-            document.getElementById('taskTitle').focus();
-        }
-
-        function closeModal() {
-            document.getElementById('taskModal').classList.remove('active');
-            document.getElementById('taskTitle').value = '';
-            document.getElementById('taskDesc').value = '';
-            document.getElementById('taskPriority').value = 'medium';
-        }
-
-        function addTask() {
-            const title = document.getElementById('taskTitle').value.trim();
-            const description = document.getElementById('taskDesc').value.trim();
-            const priority = document.getElementById('taskPriority').value;
-
-            if (!title) return;
-
-            tasks.push({
-                id: Date.now().toString(),
-                title,
-                description,
-                priority,
-                status: 'todo'
-            });
-
-            saveTasks();
-            renderTasks();
-            closeModal();
-        }
-
-        function deleteTask(id) {
-            tasks = tasks.filter(t => t.id !== id);
-            saveTasks();
-            renderTasks();
-        }
-
-        function saveTasks() {
-            localStorage.setItem('kanban_tasks', JSON.stringify(tasks));
+        function allowDrop(e) {
+            e.preventDefault();
         }
 
         function drag(e) {
@@ -410,15 +384,11 @@
             e.target.classList.add('dragging');
         }
 
-        function allowDrop(e) {
-            e.preventDefault();
-        }
-
         function drop(e, status) {
             e.preventDefault();
+            // Note: Changes won't persist - tasks are read-only from GitHub
             if (draggedTask) {
                 draggedTask.status = status;
-                saveTasks();
                 renderTasks();
                 draggedTask = null;
             }
@@ -432,12 +402,12 @@
 
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') closeModal();
-            if (e.key === 'Enter' && e.ctrlKey && document.getElementById('taskModal').classList.contains('active')) {
-                addTask();
-            }
         });
 
-        renderTasks();
+        // Remove "Add Task" button - tasks are managed via GitHub
+        document.querySelector('header .btn').style.display = 'none';
+
+        loadTasks();
     </script>
 </body>
 </html>

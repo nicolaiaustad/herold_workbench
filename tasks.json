@@ -1,0 +1,23 @@
+[
+  {
+    "id": "1",
+    "title": "Set up GitHub Pages for dashboard",
+    "description": "Enable Pages in repo settings to make dashboard accessible",
+    "priority": "high",
+    "status": "done"
+  },
+  {
+    "id": "2",
+    "title": "Review pending PRs in agent repos",
+    "description": "Check openclaw PRs for any urgent merges needed",
+    "priority": "medium",
+    "status": "todo"
+  },
+  {
+    "id": "3",
+    "title": "Update agent memory files",
+    "description": "Review recent conversations and update MEMORY.md with key insights",
+    "priority": "low",
+    "status": "todo"
+  }
+]

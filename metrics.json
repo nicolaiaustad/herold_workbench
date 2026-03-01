@@ -1,22 +1,28 @@
 {
-  "totalCost": 0.005,
-  "totalCalls": 1,
-  "tasksCompleted": 1,
+  "totalCost": 0.01,
+  "totalCalls": 2,
+  "tasksCompleted": 2,
   "costChange": 0,
-  "callsChange": 1,
-  "tasksChange": 1,
+  "callsChange": 2,
+  "tasksChange": 2,
   "models": [
     {
       "name": "moonshot/kimi-k2.5",
-      "cost": 0.005,
-      "calls": 1
+      "cost": 0.01,
+      "calls": 2
     }
   ],
-  "lastUpdated": "2026-03-01T17:01:25.081Z",
+  "lastUpdated": "2026-03-01T17:01:30.600Z",
   "dailyLog": [
     {
       "date": "2026-03-01T17:01:25.081Z",
       "task": "Created kanban dashboard with GitHub Issues integration",
+      "cost": 0.005,
+      "model": "moonshot/kimi-k2.5"
+    },
+    {
+      "date": "2026-03-01T17:01:30.600Z",
+      "task": "Added API cost metrics panel to dashboard",
       "cost": 0.005,
       "model": "moonshot/kimi-k2.5"
     }

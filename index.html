@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Herold Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f0f23;
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #2a2a4a;
+        }
+
+        h1 {
+            font-size: 24px;
+            color: #fff;
+        }
+
+        h1 span {
+            color: #6366f1;
+        }
+
+        .btn {
+            background: #6366f1;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background: #4f46e5;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+
+        .column {
+            background: #1a1a2e;
+            border-radius: 12px;
+            padding: 15px;
+            min-height: 400px;
+        }
+
+        .column-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid;
+        }
+
+        .column-header h2 {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .count {
+            background: rgba(255,255,255,0.1);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+
+        .todo .column-header { border-color: #64748b; }
+        .inprogress .column-header h2 { color: #3b82f6; }
+        .inprogress .column-header { border-color: #3b82f6; }
+        .review .column-header h2 { color: #f59e0b; }
+        .review .column-header { border-color: #f59e0b; }
+        .done .column-header h2 { color: #10b981; }
+        .done .column-header { border-color: #10b981; }
+
+        .tasks {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .task {
+            background: #252542;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: grab;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+        }
+
+        .task:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .task.dragging {
+            opacity: 0.5;
+            cursor: grabbing;
+        }
+
+        .task h3 {
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+
+        .task p {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .task-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .priority {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .priority-high {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .priority-medium {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+        }
+
+        .priority-low {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .delete-btn {
+            background: transparent;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 0 4px;
+        }
+
+        .delete-btn:hover {
+            color: #ef4444;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #1a1a2e;
+            padding: 25px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .modal-content h2 {
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #94a3b8;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            background: #252542;
+            border: 1px solid #2a2a4a;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .btn-secondary {
+            background: #374151;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        @media (max-width: 1024px) {
+            .board {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .board {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🦉 <span>Herold</span> Dashboard</h1>
+        <button class="btn" onclick="openModal()">+ New Task</button>
+    </header>
+
+    <div class="board">
+        <div class="column todo" data-status="todo">
+            <div class="column-header">
+                <h2>To Do</h2>
+                <span class="count">0</span>
+            </div>
+            <div class="tasks" ondrop="drop(event, 'todo')" ondragover="allowDrop(event)"></div>
+        </div>
+
+        <div class="column inprogress" data-status="inprogress">
+            <div class="column-header">
+                <h2>In Progress</h2>
+                <span class="count">0</span>
+            </div>
+            <div class="tasks" ondrop="drop(event, 'inprogress')" ondragover="allowDrop(event)"></div>
+        </div>
+
+        <div class="column review" data-status="review">
+            <div class="column-header">
+                <h2>Review</h2>
+                <span class="count">0</span>
+            </div>
+            <div class="tasks" ondrop="drop(event, 'review')" ondragover="allowDrop(event)"></div>
+        </div>
+
+        <div class="column done" data-status="done">
+            <div class="column-header">
+                <h2>Done</h2>
+                <span class="count">0</span>
+            </div>
+            <div class="tasks" ondrop="drop(event, 'done')" ondragover="allowDrop(event)"></div>
+        </div>
+    </div>
+
+    <div class="modal" id="taskModal">
+        <div class="modal-content">
+            <h2>New Task</h2>
+            <div class="form-group">
+                <label>Title</label>
+                <input type="text" id="taskTitle" placeholder="Enter task title">
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <textarea id="taskDesc" placeholder="Enter task description"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Priority</label>
+                <select id="taskPriority">
+                    <option value="high">High</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="low">Low</option>
+                </select>
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn" onclick="addTask()">Add Task</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let tasks = JSON.parse(localStorage.getItem('kanban_tasks')) || [];
+        let draggedTask = null;
+
+        function renderTasks() {
+            document.querySelectorAll('.tasks').forEach(col => col.innerHTML = '');
+            
+            const counts = { todo: 0, inprogress: 0, review: 0, done: 0 };
+            
+            tasks.forEach(task => {
+                counts[task.status]++;
+                const taskEl = document.createElement('div');
+                taskEl.className = 'task';
+                taskEl.draggable = true;
+                taskEl.dataset.id = task.id;
+                taskEl.innerHTML = `
+                    <h3>${escapeHtml(task.title)}</h3>
+                    <p>${escapeHtml(task.description)}</p>
+                    <div class="task-meta">
+                        <span class="priority priority-${task.priority}">${task.priority}</span>
+                        <button class="delete-btn" onclick="deleteTask('${task.id}')">×</button>
+                    </div>
+                `;
+                taskEl.addEventListener('dragstart', drag);
+                document.querySelector(`.column[data-status="${task.status}"] .tasks`).appendChild(taskEl);
+            });
+
+            Object.entries(counts).forEach(([status, count]) => {
+                document.querySelector(`.column[data-status="${status}"] .count`).textContent = count;
+            });
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function openModal() {
+            document.getElementById('taskModal').classList.add('active');
+            document.getElementById('taskTitle').focus();
+        }
+
+        function closeModal() {
+            document.getElementById('taskModal').classList.remove('active');
+            document.getElementById('taskTitle').value = '';
+            document.getElementById('taskDesc').value = '';
+            document.getElementById('taskPriority').value = 'medium';
+        }
+
+        function addTask() {
+            const title = document.getElementById('taskTitle').value.trim();
+            const description = document.getElementById('taskDesc').value.trim();
+            const priority = document.getElementById('taskPriority').value;
+
+            if (!title) return;
+
+            tasks.push({
+                id: Date.now().toString(),
+                title,
+                description,
+                priority,
+                status: 'todo'
+            });
+
+            saveTasks();
+            renderTasks();
+            closeModal();
+        }
+
+        function deleteTask(id) {
+            tasks = tasks.filter(t => t.id !== id);
+            saveTasks();
+            renderTasks();
+        }
+
+        function saveTasks() {
+            localStorage.setItem('kanban_tasks', JSON.stringify(tasks));
+        }
+
+        function drag(e) {
+            draggedTask = tasks.find(t => t.id === e.target.dataset.id);
+            e.target.classList.add('dragging');
+        }
+
+        function allowDrop(e) {
+            e.preventDefault();
+        }
+
+        function drop(e, status) {
+            e.preventDefault();
+            if (draggedTask) {
+                draggedTask.status = status;
+                saveTasks();
+                renderTasks();
+                draggedTask = null;
+            }
+        }
+
+        document.addEventListener('dragend', (e) => {
+            if (e.target.classList.contains('task')) {
+                e.target.classList.remove('dragging');
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+            if (e.key === 'Enter' && e.ctrlKey && document.getElementById('taskModal').classList.contains('active')) {
+                addTask();
+            }
+        });
+
+        renderTasks();
+    </script>
+</body>
+</html>

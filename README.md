@@ -1,4 +1,4 @@
-# Herold Dashboard
+# Herold Workbench
 
 A kanban dashboard powered by GitHub Issues for tracking Herold's tasks.
 
@@ -13,7 +13,7 @@ A kanban dashboard powered by GitHub Issues for tracking Herold's tasks.
 ## How to Use
 
 ### Creating Tasks
-Click "+ New Issue" button or go to https://github.com/nicolaiaustad/herold_dashboard/issues/new
+Click "+ New Issue" button or go to https://github.com/nicolaiaustad/herold_workbench/issues/new
 
 ### Moving Tasks Between Columns
 Update issue labels:
@@ -31,7 +31,7 @@ Add labels:
 ## GitHub Pages
 
 Dashboard auto-deploys from `main` branch to:
-https://nicolaiaustad.github.io/herold_dashboard/
+https://nicolaiaustad.github.io/herold_workbench/
 
 ## License
 

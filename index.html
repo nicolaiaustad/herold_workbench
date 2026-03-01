@@ -575,8 +575,20 @@
         addBtn.onclick = () => window.open(`https://github.com/${REPO}/issues/new`, '_blank');
 
         loadTasks();
-        // Refresh every 60 seconds
-        setInterval(loadTasks, 60000);
+        
+        // Smart polling: 10s during work hours (8am-10pm), hourly otherwise
+        function scheduleNextPoll() {
+            const now = new Date();
+            const hour = now.getHours();
+            const isWorkHours = hour >= 8 && hour < 22; // 8am to 10pm
+            const interval = isWorkHours ? 10000 : 3600000; // 10s or 1 hour
+            
+            setTimeout(() => {
+                loadTasks();
+                scheduleNextPoll();
+            }, interval);
+        }
+        scheduleNextPoll();
 
         // Load metrics
         async function loadMetrics() {

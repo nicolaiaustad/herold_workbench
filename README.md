@@ -8,7 +8,7 @@ A kanban dashboard powered by GitHub Issues for tracking Herold's tasks.
 - **4 columns**: To Do → In Progress → Review → Done
 - **Priority labels**: `priority:high`, `priority:medium`, `priority:low`
 - **Status labels**: `status:inprogress`, `status:review`
-- **Auto-refresh** - Updates every 60 seconds
+- **Smart polling** - 10s refresh during work hours (8am-10pm), hourly overnight
 - **API Cost Metrics** - Track agent performance and spending
 
 ## How to Use

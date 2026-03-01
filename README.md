@@ -11,23 +11,40 @@ A kanban dashboard powered by GitHub Issues for tracking Herold's tasks.
 - **Smart polling** - 10s refresh during work hours (8am-10pm), hourly overnight
 - **API Cost Metrics** - Track agent performance and spending
 
-## How to Use
+## How It Works
+
+The dashboard loads tasks from `issues.json` (cached GitHub issues) to avoid API rate limits. The cache is updated via `sync-issues.js`.
 
 ### Creating Tasks
 Click "+ New Issue" button or go to https://github.com/nicolaiaustad/herold_workbench/issues/new
 
 ### Moving Tasks Between Columns
-Update issue labels:
+Update issue labels on GitHub:
 - **To Do** - No status label (default)
 - **In Progress** - Add label `status:inprogress`
 - **Review** - Add label `status:review`
 - **Done** - Close the issue
+
+Then sync the issues:
+```bash
+node sync-issues.js
+```
 
 ### Setting Priority
 Add labels:
 - `priority:high` (red)
 - `priority:medium` (yellow) - default
 - `priority:low` (green)
+
+### Syncing Issues
+Since the dashboard uses a cached `issues.json` file to avoid GitHub API rate limits, you need to sync after making changes:
+
+```bash
+# Sync issues from GitHub to issues.json
+node sync-issues.js
+```
+
+This fetches all issues and saves them to `issues.json`, which the dashboard reads.
 
 ## API Cost Metrics
 

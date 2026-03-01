@@ -326,20 +326,50 @@
     </div>
 
     <script>
-        const TASKS_URL = 'tasks.json';
+        const REPO = 'nicolaiaustad/herold_dashboard';
+        const ISSUES_URL = `https://api.github.com/repos/${REPO}/issues?state=all`;
         let tasks = [];
         let draggedTask = null;
 
         async function loadTasks() {
             try {
-                const response = await fetch(TASKS_URL + '?t=' + Date.now());
-                if (!response.ok) throw new Error('Failed to load');
-                tasks = await response.json();
+                const response = await fetch(ISSUES_URL);
+                if (!response.ok) throw new Error('Failed to load issues');
+                const issues = await response.json();
+                tasks = issues.map(issue => parseIssue(issue));
                 renderTasks();
             } catch (err) {
-                console.error('Error loading tasks:', err);
-                document.querySelector('.board').innerHTML = '<p style="color:#ef4444;text-align:center;">Failed to load tasks. Check tasks.json exists.</p>';
+                console.error('Error loading issues:', err);
+                document.querySelector('.board').innerHTML = '<p style="color:#ef4444;text-align:center;">Failed to load issues from GitHub.</p>';
             }
+        }
+
+        function parseIssue(issue) {
+            const labels = issue.labels.map(l => l.name.toLowerCase());
+            
+            // Determine priority from labels
+            let priority = 'medium';
+            if (labels.includes('priority:high') || labels.includes('high')) priority = 'high';
+            if (labels.includes('priority:low') || labels.includes('low')) priority = 'low';
+            
+            // Determine status from labels or issue state
+            let status = 'todo';
+            if (issue.state === 'closed') {
+                status = 'done';
+            } else if (labels.includes('status:inprogress') || labels.includes('inprogress')) {
+                status = 'inprogress';
+            } else if (labels.includes('status:review') || labels.includes('review')) {
+                status = 'review';
+            }
+            
+            return {
+                id: issue.number.toString(),
+                title: issue.title,
+                description: issue.body || '',
+                priority,
+                status,
+                url: issue.html_url
+            };
         }
 
         function renderTasks() {
@@ -354,10 +384,11 @@
                 taskEl.draggable = true;
                 taskEl.dataset.id = task.id;
                 taskEl.innerHTML = `
-                    <h3>${escapeHtml(task.title)}</h3>
-                    <p>${escapeHtml(task.description)}</p>
+                    <h3><a href="${task.url}" target="_blank" style="color:inherit;text-decoration:none;">${escapeHtml(task.title)}</a></h3>
+                    <p>${escapeHtml(task.description.substring(0, 100))}${task.description.length > 100 ? '...' : ''}</p>
                     <div class="task-meta">
                         <span class="priority priority-${task.priority}">${task.priority}</span>
+                        <span style="font-size:11px;color:#64748b;">#${task.id}</span>
                     </div>
                 `;
                 taskEl.addEventListener('dragstart', drag);
@@ -386,11 +417,12 @@
 
         function drop(e, status) {
             e.preventDefault();
-            // Note: Changes won't persist - tasks are read-only from GitHub
+            // Visual only - actual status change via GitHub issues
             if (draggedTask) {
                 draggedTask.status = status;
                 renderTasks();
                 draggedTask = null;
+                alert('To move this task, update the labels on GitHub: https://github.com/' + REPO + '/issues');
             }
         }
 
@@ -404,10 +436,14 @@
             if (e.key === 'Escape') closeModal();
         });
 
-        // Remove "Add Task" button - tasks are managed via GitHub
-        document.querySelector('header .btn').style.display = 'none';
+        // Remove "Add Task" button - create via GitHub instead
+        const addBtn = document.querySelector('header .btn');
+        addBtn.textContent = '+ New Issue';
+        addBtn.onclick = () => window.open(`https://github.com/${REPO}/issues/new`, '_blank');
 
         loadTasks();
+        // Refresh every 60 seconds
+        setInterval(loadTasks, 60000);
     </script>
 </body>
 </html>

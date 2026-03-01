@@ -1,45 +1,37 @@
 # Herold Dashboard
 
-A dashboard for monitoring and managing AI agent operations.
+A kanban dashboard powered by GitHub Issues for tracking Herold's tasks.
 
 ## Features
 
-- **Kanban Board** - Drag-and-drop task management
-- Agent status monitoring
-- Task queue visualization
-- Performance metrics
-- System health checks
+- **GitHub Issues as tasks** - Each issue is a task
+- **4 columns**: To Do → In Progress → Review → Done
+- **Priority labels**: `priority:high`, `priority:medium`, `priority:low`
+- **Status labels**: `status:inprogress`, `status:review`
+- **Auto-refresh** - Updates every 60 seconds
 
-## Quick Start
+## How to Use
 
-```bash
-# Run with Python
-python3 -m http.server 8080
+### Creating Tasks
+Click "+ New Issue" button or go to https://github.com/nicolaiaustad/herold_dashboard/issues/new
 
-# Or with Node
-npx serve -p 8080
-```
+### Moving Tasks Between Columns
+Update issue labels:
+- **To Do** - No status label (default)
+- **In Progress** - Add label `status:inprogress`
+- **Review** - Add label `status:review`
+- **Done** - Close the issue
 
-Then open http://localhost:8080
+### Setting Priority
+Add labels:
+- `priority:high` (red)
+- `priority:medium` (yellow) - default
+- `priority:low` (green)
 
-## Kanban Usage
+## GitHub Pages
 
-- **Add task**: Click "+ New Task"
-- **Move task**: Drag between columns
-- **Delete task**: Click × on task
-- **Priorities**: High/Medium/Low
-
-Tasks persist in browser localStorage.
-
-## Development Setup
-
-```bash
-# Install dependencies
-npm install
-
-# Run development server
-npm run dev
-```
+Dashboard auto-deploys from `main` branch to:
+https://nicolaiaustad.github.io/herold_dashboard/
 
 ## License
 

@@ -1,0 +1,124 @@
+{
+  "nodes": [
+    {
+      "id": ".",
+      "name": "architecture-viz",
+      "type": "directory",
+      "path": "."
+    },
+    {
+      "id": "index.html",
+      "name": "index.html",
+      "type": "file",
+      "path": "index.html",
+      "size": 1197
+    },
+    {
+      "id": "package.json",
+      "name": "package.json",
+      "type": "file",
+      "path": "package.json",
+      "size": 529
+    },
+    {
+      "id": "src",
+      "name": "src",
+      "type": "directory",
+      "path": "src"
+    },
+    {
+      "id": "src/graph-data.json",
+      "name": "graph-data.json",
+      "type": "file",
+      "path": "src/graph-data.json",
+      "size": 4946
+    },
+    {
+      "id": "src/main.ts",
+      "name": "main.ts",
+      "type": "file",
+      "path": "src/main.ts",
+      "size": 6884
+    },
+    {
+      "id": "src/parser.ts",
+      "name": "parser.ts",
+      "type": "file",
+      "path": "src/parser.ts",
+      "size": 4343
+    },
+    {
+      "id": "src/types.d.ts",
+      "name": "types.d.ts",
+      "type": "file",
+      "path": "src/types.d.ts",
+      "size": 72
+    },
+    {
+      "id": "tsconfig.json",
+      "name": "tsconfig.json",
+      "type": "file",
+      "path": "tsconfig.json",
+      "size": 516
+    },
+    {
+      "id": "vite.config.ts",
+      "name": "vite.config.ts",
+      "type": "file",
+      "path": "vite.config.ts",
+      "size": 153
+    }
+  ],
+  "links": [
+    {
+      "source": ".",
+      "target": "index.html",
+      "type": "contains"
+    },
+    {
+      "source": ".",
+      "target": "package.json",
+      "type": "contains"
+    },
+    {
+      "source": ".",
+      "target": "src",
+      "type": "contains"
+    },
+    {
+      "source": "src",
+      "target": "src/graph-data.json",
+      "type": "contains"
+    },
+    {
+      "source": "src",
+      "target": "src/main.ts",
+      "type": "contains"
+    },
+    {
+      "source": "src/main.ts",
+      "target": "src/graph-data.json",
+      "type": "import"
+    },
+    {
+      "source": "src",
+      "target": "src/parser.ts",
+      "type": "contains"
+    },
+    {
+      "source": "src",
+      "target": "src/types.d.ts",
+      "type": "contains"
+    },
+    {
+      "source": ".",
+      "target": "tsconfig.json",
+      "type": "contains"
+    },
+    {
+      "source": ".",
+      "target": "vite.config.ts",
+      "type": "contains"
+    }
+  ]
+}

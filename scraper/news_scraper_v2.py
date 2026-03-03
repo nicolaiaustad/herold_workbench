@@ -83,8 +83,11 @@ SOURCES = {
     }
 }
 
-def fetch_feed(url, timeout=45):
-    """Fetch RSS feed with extended timeout"""
+import socks  # PySocks for SOCKS5 proxy support
+import socket as socket_module
+
+def fetch_feed(url, timeout=45, use_proxy=False):
+    """Fetch RSS feed with extended timeout, optionally via SOCKS5 proxy"""
     try:
         ctx = ssl.create_default_context()
         ctx.check_hostname = False
@@ -92,12 +95,26 @@ def fetch_feed(url, timeout=45):
         
         req = urllib.request.Request(
             url,
-            headers={'User-Agent': 'Herold-NewsBot/1.0'},
+            headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'},
             method='GET'
         )
         
-        with urllib.request.urlopen(req, timeout=timeout, context=ctx) as response:
-            return response.read().decode('utf-8')
+        # Use SOCKS5 proxy for geo-blocked sites
+        if use_proxy:
+            # Save original socket
+            original_socket = socket_module.socket
+            # Set up SOCKS5 proxy
+            socks.set_default_proxy(socks.SOCKS5, "localhost", 1055)
+            socket_module.socket = socks.socksocket
+        
+        try:
+            with urllib.request.urlopen(req, timeout=timeout, context=ctx) as response:
+                return response.read().decode('utf-8')
+        finally:
+            if use_proxy:
+                # Restore original socket
+                socket_module.socket = original_socket
+                
     except Exception as e:
         return None
 
@@ -159,18 +176,17 @@ def main():
     print(f"🔍 Starting news scan at {datetime.now()}")
     print(f"   Timeout: 45s per source")
     findings = []
-    geo_blocked = []
     
     for source_id, config in SOURCES.items():
-        # Skip geo-blocked sources quickly
-        if config.get('geo_blocked'):
-            print(f"\n  ⏭️  {config['name']} - skipped (geo-blocked)")
-            geo_blocked.append(config['name'])
-            continue
-            
-        print(f"\n  Checking {config['name']}...")
+        # Use proxy for geo-blocked sources
+        use_proxy = config.get('geo_blocked', False)
+        if use_proxy:
+            print(f"\n  Checking {config['name']} (via Norway proxy)...")
+        else:
+            print(f"\n  Checking {config['name']}...")
+        
         try:
-            xml = fetch_feed(config['rss'])
+            xml = fetch_feed(config['rss'], use_proxy=use_proxy)
             if xml is None:
                 print(f"    ✗ Timeout or error")
                 continue
@@ -235,10 +251,6 @@ def main():
             lines.append(f"---")
             lines.append(f"⚠️ {paywalled} article(s) behind paywall")
         
-        if geo_blocked:
-            lines.append(f"---")
-            lines.append(f"⏭️ Skipped (geo-blocked): {', '.join(geo_blocked)}")
-        
         report_file = f"/data/.openclaw/workspace/herold_workbench/scraper/report_{date_str}.txt"
         with open(report_file, 'w', encoding='utf-8') as f:
             f.write('\n'.join(lines))
@@ -247,15 +259,9 @@ def main():
         print(f"   Found: {len(findings)} leads")
     else:
         report_file = f"/data/.openclaw/workspace/herold_workbench/scraper/report_{date_str}.txt"
-        lines = [
-            f"📰 Daily News Scan - {datetime.now().strftime('%d.%m.%Y')}",
-            f"ℹ️ No relevant leads found today."
-        ]
-        if geo_blocked:
-            lines.append(f"---")
-            lines.append(f"⏭️ Skipped (geo-blocked): {', '.join(geo_blocked)}")
         with open(report_file, 'w', encoding='utf-8') as f:
-            f.write('\n'.join(lines))
+            f.write(f"📰 Daily News Scan - {datetime.now().strftime('%d.%m.%Y')}\n")
+            f.write(f"ℹ️ No relevant leads found today.\n")
         print(f"\nℹ️ No findings today")
     
     print(f"✅ Done at {datetime.now()}")

@@ -40,6 +40,12 @@ npm run preview
 
 [View on GitHub Pages](https://nicolai-austad.github.io/herold_workbench/architecture-viz/)
 
+## Controls
+
+- **Left click + drag**: Rotate the view
+- **Right click + drag**: Pan
+- **Scroll**: Zoom in/out
+
 ## License
 
 MIT

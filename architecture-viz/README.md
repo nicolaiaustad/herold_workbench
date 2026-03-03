@@ -46,6 +46,13 @@ npm run preview
 - **Right click + drag**: Pan
 - **Scroll**: Zoom in/out
 
+## Development
+
+```bash
+npm install
+npm run dev
+```
+
 ## License
 
 MIT

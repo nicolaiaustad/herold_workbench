@@ -57,6 +57,34 @@ const dirMaterial = new THREE.MeshBasicMaterial({ color: 0x60a5fa });
 
 const nodesGroup = new THREE.Group();
 const nodeMeshes = new Map<string, THREE.Mesh>();
+const labelSprites = new Map<string, THREE.Sprite>();
+
+function createLabelSprite(text: string, isDir: boolean): THREE.Sprite {
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d')!;
+  const fontSize = 24;
+  ctx.font = `${isDir ? 'bold' : 'normal'} ${fontSize}px system-ui, sans-serif`;
+  
+  const metrics = ctx.measureText(text);
+  const textWidth = metrics.width;
+  
+  canvas.width = textWidth + 20;
+  canvas.height = fontSize + 10;
+  
+  ctx.font = `${isDir ? 'bold' : 'normal'} ${fontSize}px system-ui, sans-serif`;
+  ctx.fillStyle = isDir ? '#60a5fa' : '#4ade80';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+  
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.minFilter = THREE.LinearFilter;
+  
+  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, transparent: true }));
+  sprite.scale.set(canvas.width / 30, canvas.height / 30, 1);
+  
+  return sprite;
+}
 
 data.nodes.forEach(node => {
   const isDir = node.type === 'directory';
@@ -83,6 +111,11 @@ data.nodes.forEach(node => {
   mesh.userData = { node };
   nodesGroup.add(mesh);
   nodeMeshes.set(node.id, mesh);
+  
+  const label = createLabelSprite(node.name, isDir);
+  label.position.set(node.x!, node.y! + size + 0.8, node.z!);
+  nodesGroup.add(label);
+  labelSprites.set(node.id, label);
 });
 
 scene.add(nodesGroup);
@@ -238,6 +271,13 @@ function applyForces() {
     const mesh = nodeMeshes.get(node.id);
     if (mesh) {
       mesh.position.set(node.x!, node.y!, node.z!);
+    }
+    
+    const label = labelSprites.get(node.id);
+    if (label) {
+      const isDir = node.type === 'directory';
+      const size = isDir ? 1.5 + (node.size || 0) * 0.001 : 0.8;
+      label.position.set(node.x!, node.y! + size + 0.8, node.z!);
     }
   });
 }

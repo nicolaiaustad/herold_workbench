@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 
 export default defineConfig({
-  base: '/herold_workbench/architecture-viz/',
+  base: '/herold_workbench/',
   build: {
     outDir: 'dist',
   },

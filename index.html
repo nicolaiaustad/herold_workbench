@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Herold Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #0f3460;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 600;
+            color: #ff6b35;
+        }
+
+        .timestamp {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: #0f3460;
+            border-radius: 8px;
+            padding: 20px;
+            border-left: 4px solid #ff6b35;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+        }
+
+        .card h2 {
+            font-size: 18px;
+            margin-bottom: 12px;
+            color: #ff6b35;
+        }
+
+        .card-content {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .status.active {
+            background: #4caf50;
+            color: white;
+        }
+
+        .status.pending {
+            background: #ff9800;
+            color: white;
+        }
+
+        .status.blocked {
+            background: #f44336;
+            color: white;
+        }
+
+        .status.working {
+            background: #2196f3;
+            color: white;
+        }
+
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #1a3a52;
+        }
+
+        .metric:last-child {
+            border-bottom: none;
+        }
+
+        .metric-label {
+            color: #aaa;
+        }
+
+        .metric-value {
+            font-weight: 600;
+            color: #ff6b35;
+        }
+
+        .project-list {
+            list-style: none;
+        }
+
+        .project-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #1a3a52;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .project-item:last-child {
+            border-bottom: none;
+        }
+
+        .project-name {
+            font-weight: 500;
+        }
+
+        .project-status {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .wide-card {
+            grid-column: 1 / -1;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #ff6b35;
+            margin: 30px 0 15px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #0f3460;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #1a3a52;
+        }
+
+        th {
+            background: #1a3a52;
+            font-weight: 600;
+            color: #ff6b35;
+        }
+
+        tr:hover {
+            background: #1a3a52;
+        }
+
+        .icon {
+            display: inline-block;
+            width: 20px;
+            margin-right: 8px;
+            text-align: center;
+        }
+
+        .blocked-section {
+            background: #3e2f2f;
+            border-left-color: #f44336;
+        }
+
+        .link {
+            color: #ff6b35;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .link:hover {
+            text-decoration: underline;
+        }
+
+        .refresh-btn {
+            background: #ff6b35;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .refresh-btn:hover {
+            background: #e55a2b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🦉 Herold Dashboard</h1>
+            <div>
+                <button class="refresh-btn" onclick="location.reload()">↻ Refresh</button>
+                <div class="timestamp" id="timestamp"></div>
+            </div>
+        </header>
+
+        <!-- Status Overview -->
+        <div class="grid">
+            <div class="card">
+                <h2><span class="icon">⚡</span>Session Status</h2>
+                <div class="card-content">
+                    <div class="metric">
+                        <span class="metric-label">Last Active</span>
+                        <span class="metric-value">2026-03-29 21:51</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Uptime</span>
+                        <span class="metric-value">100%</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Systems Ready</span>
+                        <span class="metric-value">4/5</span>
+                    </div>
+                    <span class="status active">OPERATIONAL</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2><span class="icon">📊</span>Active Projects</h2>
+                <div class="card-content">
+                    <div class="metric">
+                        <span class="metric-label">Total Projects</span>
+                        <span class="metric-value">1</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">In Progress</span>
+                        <span class="metric-value">The Realm</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Stage</span>
+                        <span class="metric-value">Early</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2><span class="icon">🤖</span>Automation</h2>
+                <div class="card-content">
+                    <div class="metric">
+                        <span class="metric-label">Cron Jobs</span>
+                        <span class="metric-value">1</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Next Run</span>
+                        <span class="metric-value">Tomorrow 9 AM</span>
+                    </div>
+                    <span class="status active">HN Monitoring Active</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Projects -->
+        <h3 class="section-title">Projects</h3>
+        <div class="grid">
+            <div class="card">
+                <h2>🎭 The Realm</h2>
+                <div class="card-content">
+                    <p><strong>Agent network for personalized AI agents</strong></p>
+                    <p style="margin-top: 10px; color: #aaa;">Market: YouTube/podcast hosts looking for guests</p>
+                    <p style="margin-top: 8px; color: #aaa;">URL: <a href="https://www.therealm.live" class="link" target="_blank">www.therealm.live</a></p>
+                    <div class="metric" style="border: none; padding: 10px 0 0 0;">
+                        <span class="metric-label">Repo</span>
+                        <span class="metric-value"><a href="https://github.com/nicolaiaustad/realm" class="link" target="_blank">GitHub</a></span>
+                    </div>
+                    <span class="status working">ACTIVE DEVELOPMENT</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Integrations -->
+        <h3 class="section-title">Integrations & APIs</h3>
+        <div class="grid">
+            <div class="card">
+                <h2>📱 Telegram</h2>
+                <div class="card-content">
+                    <span class="status active">✓ Connected</span>
+                    <p style="margin-top: 8px; color: #aaa;">Personal bot active. Message routing ready.</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>✅ Todoist</h2>
+                <div class="card-content">
+                    <span class="status active">✓ Synced</span>
+                    <p style="margin-top: 8px; color: #aaa;">Realm project configured. 5 columns mapped.</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>🔗 GitHub</h2>
+                <div class="card-content">
+                    <span class="status pending">⚠ Token Invalid</span>
+                    <p style="margin-top: 8px; color: #aaa;">Need fresh PAT for issue creation.</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>📰 HackerNews</h2>
+                <div class="card-content">
+                    <span class="status active">✓ Monitoring</span>
+                    <p style="margin-top: 8px; color: #aaa;">Daily 9 AM. Creates Todoist tasks automatically.</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>🔴 Reddit</h2>
+                <div class="card-content">
+                    <span class="status blocked">✗ Blocked</span>
+                    <p style="margin-top: 8px; color: #aaa;">API access denied. Investigating.</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>🐦 X/Twitter</h2>
+                <div class="card-content">
+                    <span class="status pending">⏳ Deprioritized</span>
+                    <p style="margin-top: 8px; color: #aaa;">$100+/month. Using free alternatives.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monitoring Stack -->
+        <h3 class="section-title">Monitoring Stack</h3>
+        <div class="card wide-card">
+            <div class="card-content">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Source</th>
+                            <th>Status</th>
+                            <th>Frequency</th>
+                            <th>Destination</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>HackerNews RSS</td>
+                            <td><span class="status active">Active</span></td>
+                            <td>Daily 9 AM</td>
+                            <td>Todoist (Realm → Market Insight)</td>
+                        </tr>
+                        <tr>
+                            <td>Reddit API</td>
+                            <td><span class="status blocked">Blocked</span></td>
+                            <td>—</td>
+                            <td>Pending</td>
+                        </tr>
+                        <tr>
+                            <td>Google Trends</td>
+                            <td><span class="status pending">Planned</span></td>
+                            <td>—</td>
+                            <td>TBD</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Open Blockers -->
+        <h3 class="section-title">Open Blockers</h3>
+        <div class="grid">
+            <div class="card blocked-section">
+                <h2>🚫 Blockers</h2>
+                <div class="card-content">
+                    <ul class="project-list">
+                        <li class="project-item">
+                            <span class="project-name">GitHub Token</span>
+                            <span class="project-status">Need valid PAT</span>
+                        </li>
+                        <li class="project-item">
+                            <span class="project-name">Reddit API</span>
+                            <span class="project-status">Access denied</span>
+                        </li>
+                        <li class="project-item">
+                            <span class="project-name">Twilio Setup</span>
+                            <span class="project-status">Task created, pending</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>❓ Decisions Pending</h2>
+                <div class="card-content">
+                    <ul class="project-list">
+                        <li class="project-item">
+                            <span class="project-name">Agent Workforce</span>
+                            <span class="project-status">Config design</span>
+                        </li>
+                        <li class="project-item">
+                            <span class="project-name">Realm Slogan</span>
+                            <span class="project-status">Final choice</span>
+                        </li>
+                        <li class="project-item">
+                            <span class="project-name">Twilio Use Case</span>
+                            <span class="project-status">Clarification needed</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Memory Files -->
+        <h3 class="section-title">Memory & Logs</h3>
+        <div class="card wide-card">
+            <div class="card-content">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>File</th>
+                            <th>Purpose</th>
+                            <th>Last Updated</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><a href="../memory/DASHBOARD.md" class="link">DASHBOARD.md</a></td>
+                            <td>Quick status overview</td>
+                            <td>2026-03-29</td>
+                        </tr>
+                        <tr>
+                            <td><a href="../memory/2026-03-29.md" class="link">2026-03-29.md</a></td>
+                            <td>Today's session log</td>
+                            <td>2026-03-29</td>
+                        </tr>
+                        <tr>
+                            <td><a href="../memory/projects/realm.md" class="link">Realm Project</a></td>
+                            <td>Project-specific memory</td>
+                            <td>2026-03-29</td>
+                        </tr>
+                        <tr>
+                            <td><a href="../MEMORY.md" class="link">MEMORY.md</a></td>
+                            <td>Long-term curated memory</td>
+                            <td>2026-03-29</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer style="text-align: center; margin-top: 50px; padding-top: 20px; border-top: 1px solid #0f3460; color: #666;">
+            <p>Herold Dashboard • Last updated: <span id="footer-time"></span></p>
+            <p style="font-size: 12px; margin-top: 8px;">Workspace: /data/.openclaw/workspace</p>
+        </footer>
+    </div>
+
+    <script>
+        function updateTimestamps() {
+            const now = new Date();
+            const formatted = now.toLocaleString('en-US', { 
+                year: 'numeric', 
+                month: '2-digit', 
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                timeZone: 'Europe/Berlin'
+            });
+            document.getElementById('timestamp').textContent = formatted;
+            document.getElementById('footer-time').textContent = formatted;
+        }
+
+        updateTimestamps();
+        setInterval(updateTimestamps, 1000);
+    </script>
+</body>
+</html>
